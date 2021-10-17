@@ -1,35 +1,51 @@
 import { getSession, withPageAuthRequired } from "@auth0/nextjs-auth0";
+import Nav from "../../components/global/Nav";
+import getOrgByUserId from "../../utils/get_org_by_user_id";
 import {
-    Alert,
-    AlertTitle,
-    AlertIcon,
-    AlertDescription,
-    Box,
-} from "@chakra-ui/react";
+    DashboardAlert,
+    DashboardCreateOrgForm,
+} from "../../components/dashboard_index";
 
 const Dashboard = (props) => {
-    if (!props.emailVerified) {
+    if (props.state === "EMAIL_NOT_VERIFIED") {
+        return <DashboardAlert />;
+    }
+
+    if (props.state === "USER_NO_ORG") {
         return (
-            <Box mx={[4, "auto"]} mt="32" w={["100%", "50%"]}>
-                <Alert status="warning" justifyContent="center">
-                    <AlertIcon />
-                    <AlertTitle>Email not Verified!</AlertTitle>
-                    <AlertDescription>
-                        Please check your Inbox for the Verification Link.
-                    </AlertDescription>
-                </Alert>
-            </Box>
+            <>
+                <Nav picture={props.payload.picture} />
+                <DashboardCreateOrgForm />
+            </>
         );
     }
 
-    return <h1>Dashboard</h1>;
+    return <></>;
 };
 
+// Returns {state, payload}
 export const getServerSideProps = withPageAuthRequired({
     async getServerSideProps({ req }) {
         const { user } = getSession(req);
 
-        return { props: { emailVerified: user.email_verified } };
+        if (!user.email_verified) {
+            return { props: { state: "EMAIL_NOT_VERIFIED" } };
+        }
+
+        const { data: orgs } = await getOrgByUserId(user.sub);
+
+        if (orgs.length === 0) {
+            return {
+                props: {
+                    state: "USER_NO_ORG",
+                    payload: { picture: user.picture },
+                },
+            };
+        }
+
+        return {
+            props: {},
+        };
     },
 });
 

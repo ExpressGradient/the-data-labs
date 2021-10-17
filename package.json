@@ -10,9 +10,13 @@
     },
     "dependencies": {
         "@auth0/nextjs-auth0": "^1.5.0",
+        "@chakra-ui/icons": "^1.0.15",
+        "faunadb": "^4.4.1",
         "next": "11.1.2",
         "react": "17.0.2",
-        "react-dom": "17.0.2"
+        "react-dom": "17.0.2",
+        "react-hook-form": "^7.17.4",
+        "slugify": "^1.6.1"
     },
     "devDependencies": {
         "@chakra-ui/react": "^1.6.9",
