@@ -12,11 +12,13 @@ import {
     FormHelperText,
     FormErrorMessage,
     Textarea,
+    useToast,
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { AddIcon } from "@chakra-ui/icons";
 import slugify from "slugify";
+import { useRouter } from "next/dist/client/router";
 
 export const DashboardAlert = () => (
     <Box mx={[4, "auto"]} mt="32" w={["100%", "50%"]}>
@@ -44,9 +46,46 @@ export const DashboardCreateOrgForm = () => {
         formState: { errors, isSubmitting },
         handleSubmit,
     } = useForm();
-    const orgSlug = slugify(watch("orgName") || "", { lower: true });
 
-    const onSubmit = (data) => console.log(data);
+    const toast = useToast();
+
+    const router = useRouter();
+
+    const orgNameSlug = slugify(watch("orgName") || "", { lower: true });
+    const orgDescLength = (watch("orgDesc") || "").length;
+
+    const onSubmit = async ({ orgName, orgDesc }) => {
+        const res = await fetch("/api/org/create", {
+            headers: { "Content-Type": "application/json" },
+            method: "POST",
+            body: JSON.stringify({
+                name: orgName,
+                desc: orgDesc,
+                slug: orgNameSlug,
+            }),
+        });
+
+        const { message, error } = await res.json();
+
+        if (!error) {
+            toast({
+                title: `${orgName} created`,
+                status: "success",
+                duration: 2000,
+                isClosable: true,
+                position: "top",
+            });
+            setTimeout(() => router.reload(), 2100);
+        } else {
+            toast({
+                title: `Failed to create ${orgName}`,
+                status: "error",
+                duration: 2000,
+                isClosable: true,
+                position: "top",
+            });
+        }
+    };
 
     return (
         <Box
@@ -73,7 +112,7 @@ export const DashboardCreateOrgForm = () => {
                         validate: {
                             isUnique: async (value) => {
                                 const res = await fetch(
-                                    `/api/check_unique_org_slug?slug=${slugify(
+                                    `/api/org/check_unique?slug=${slugify(
                                         value,
                                         { lower: true }
                                     )}`
@@ -84,7 +123,7 @@ export const DashboardCreateOrgForm = () => {
                         },
                     })}
                 />
-                <FormHelperText>Slug: {orgSlug}</FormHelperText>
+                <FormHelperText>Slug: {orgNameSlug}</FormHelperText>
                 <FormErrorMessage as="p">
                     {errors.hasOwnProperty("orgName") &&
                         errors.orgName.hasOwnProperty("message") &&
@@ -103,15 +142,17 @@ export const DashboardCreateOrgForm = () => {
                 <Textarea
                     id="orgDesc"
                     variant="filled"
+                    maxLength={100}
                     {...register("orgDesc", {
                         required: "Description is required",
-                        minLength: {
-                            value: 20,
+                        maxLength: {
+                            value: 100,
                             message:
-                                "Description must be of atleast 20 characters",
+                                "Description must be a maximum of 100 characters",
                         },
                     })}
                 />
+                <FormHelperText>{orgDescLength}/100 Characters</FormHelperText>
                 <FormErrorMessage as="p">
                     {errors.hasOwnProperty("orgDesc") &&
                         errors.orgDesc.hasOwnProperty("message") &&
@@ -124,7 +165,7 @@ export const DashboardCreateOrgForm = () => {
                 mt="4"
                 leftIcon={<AddIcon />}
                 isLoading={isSubmitting}
-                loadingText={`Creating ${watch("orgName")}`}
+                loadingText={`Creating`}
             >
                 Create
             </Button>

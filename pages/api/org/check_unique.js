@@ -1,4 +1,4 @@
-import checkUniqueOrgSlugUtil from "../../utils/check_unique_org_slug";
+import checkUniqueOrgSlugUtil from "../../../utils/check_unique_org_slug";
 import { withApiAuthRequired } from "@auth0/nextjs-auth0";
 
 const checkUniqueOrgSlug = async (req, res) => {

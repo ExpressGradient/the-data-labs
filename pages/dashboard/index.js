@@ -20,7 +20,7 @@ const Dashboard = (props) => {
         );
     }
 
-    return <></>;
+    return <h1>Hello</h1>;
 };
 
 // Returns {state, payload}
