@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { AddIcon } from "@chakra-ui/icons";
 import slugify from "slugify";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 
 export const DashboardAlert = () => (
     <Box mx={[4, "auto"]} mt="32" w={["100%", "50%"]}>
@@ -172,3 +172,9 @@ export const DashboardCreateOrgForm = () => {
         </Box>
     );
 };
+
+export const DashboardMain = () => (
+    <Box as="main" mx={["4", "auto"]} w={["auto", "2/3"]}>
+        
+    </Box>
+);

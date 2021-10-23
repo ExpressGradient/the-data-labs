@@ -4,23 +4,40 @@ import getOrgByUserId from "../../utils/get_org_by_user_id";
 import {
     DashboardAlert,
     DashboardCreateOrgForm,
-} from "../../components/dashboard_index";
+    DashboardMain,
+} from "../../components/dashboard/index";
+import client, { q } from "../../fauna_client";
+import useSWR from "swr";
+import { Heading } from "@chakra-ui/react";
 
-const Dashboard = (props) => {
-    if (props.state === "EMAIL_NOT_VERIFIED") {
+const fetcher = (url) => fetch(url).then((r) => r.json());
+
+const Dashboard = ({ state, payload }) => {
+    const { data } = useSWR(
+        state === "USER_HAS_ORG" ? "/api/org/get" : null,
+        fetcher,
+        { fallbackData: payload }
+    );
+
+    if (state === "EMAIL_NOT_VERIFIED") {
         return <DashboardAlert />;
     }
 
-    if (props.state === "USER_NO_ORG") {
+    if (state === "USER_NO_ORG") {
         return (
             <>
-                <Nav picture={props.payload.picture} />
+                <Nav picture={payload.picture} />
                 <DashboardCreateOrgForm />
             </>
         );
     }
 
-    return <h1>Hello</h1>;
+    return (
+        <>
+            <Nav title={data.name} picture={payload.picture} />
+            <DashboardMain />
+        </>
+    );
 };
 
 // Returns {state, payload}
@@ -43,8 +60,14 @@ export const getServerSideProps = withPageAuthRequired({
             };
         }
 
+        const [orgRef] = orgs;
+        const { data: org } = await client.query(q.Get(orgRef));
+
         return {
-            props: {},
+            props: {
+                state: "USER_HAS_ORG",
+                payload: { ...org, picture: user.picture },
+            },
         };
     },
 });
