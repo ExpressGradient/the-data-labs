@@ -11,7 +11,6 @@ import {
 import { useRouter } from "next/router";
 import { ChevronRightIcon, SettingsIcon, WarningIcon } from "@chakra-ui/icons";
 import Link from "next/link";
-import { useEffect } from "react";
 
 const Nav = ({ title, picture }) => {
     const router = useRouter();

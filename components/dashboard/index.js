@@ -13,10 +13,13 @@ import {
     FormErrorMessage,
     Textarea,
     useToast,
+    Flex,
+    InputGroup,
+    InputLeftElement,
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { AddIcon } from "@chakra-ui/icons";
+import { AddIcon, SearchIcon } from "@chakra-ui/icons";
 import slugify from "slugify";
 import { useRouter } from "next/router";
 
@@ -173,8 +176,30 @@ export const DashboardCreateOrgForm = () => {
     );
 };
 
-export const DashboardMain = () => (
-    <Box as="main" mx={["4", "auto"]} w={["auto", "2/3"]}>
-        
-    </Box>
-);
+export const LabSearchBar = () => {
+    const { register } = useForm();
+
+    return (
+        <Flex as="form">
+            <FormControl isRequired>
+                <FormLabel htmlFor="labSearch" display="none">
+                    Search your labs
+                </FormLabel>
+                <InputGroup>
+                    <InputLeftElement
+                        pointerEvents={false}
+                        children={<SearchIcon />}
+                    />
+                    <Input
+                        type="search"
+                        id="labSearch"
+                        {...register("labSearchInput")}
+                    />
+                </InputGroup>
+            </FormControl>
+            <Button type="submit" colorScheme="teal" ml="2">
+                Search
+            </Button>
+        </Flex>
+    );
+};

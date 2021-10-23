@@ -4,11 +4,11 @@ import getOrgByUserId from "../../utils/get_org_by_user_id";
 import {
     DashboardAlert,
     DashboardCreateOrgForm,
-    DashboardMain,
+    LabSearchBar,
 } from "../../components/dashboard/index";
 import client, { q } from "../../fauna_client";
 import useSWR from "swr";
-import { Heading } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -35,7 +35,9 @@ const Dashboard = ({ state, payload }) => {
     return (
         <>
             <Nav title={data.name} picture={payload.picture} />
-            <DashboardMain />
+            <Box as="main" mx={["4", "auto"]} w={["100%", 2 / 3]}>
+                <LabSearchBar />
+            </Box>
         </>
     );
 };
