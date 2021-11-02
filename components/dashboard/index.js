@@ -178,6 +178,7 @@ export const DashboardCreateOrgForm = () => {
 
 export const LabSearchBar = () => {
     const { register } = useForm();
+    const router = useRouter();
 
     return (
         <Flex as="form">
@@ -186,10 +187,9 @@ export const LabSearchBar = () => {
                     Search your labs
                 </FormLabel>
                 <InputGroup>
-                    <InputLeftElement
-                        pointerEvents={false}
-                        children={<SearchIcon />}
-                    />
+                    <InputLeftElement pointerEvents={false}>
+                        <SearchIcon />
+                    </InputLeftElement>
                     <Input
                         type="search"
                         id="labSearch"
@@ -197,8 +197,15 @@ export const LabSearchBar = () => {
                     />
                 </InputGroup>
             </FormControl>
-            <Button type="submit" colorScheme="teal" ml="2">
+            <Button type="submit" colorScheme="teal" mx="2" variant="outline">
                 Search
+            </Button>
+            <Button
+                leftIcon={<AddIcon />}
+                colorScheme="teal"
+                onClick={() => router.push("/dashboard/labs/new")}
+            >
+                Create
             </Button>
         </Flex>
     );

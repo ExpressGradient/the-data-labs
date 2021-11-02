@@ -58,11 +58,13 @@ const Nav = ({ title, picture }) => {
 
             <Flex as="nav" mt="2">
                 {navLinks.map((link, index) => (
-                    <Flex mr="3" key={index} align="center" id={link.path}>
+                    <Flex mr="2" key={index} align="center" id={link.path}>
                         <ChevronRightIcon />
+                        <Box mx="1" />
                         <Box
                             color="teal"
                             _hover={{ textDecoration: "underline" }}
+                            fontSize="sm"
                         >
                             <Link href={link.path}>
                                 <a>{link.name}</a>
