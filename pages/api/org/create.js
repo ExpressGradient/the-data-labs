@@ -13,7 +13,7 @@ const createOrg = async (req, res) => {
                     name,
                     slug,
                     desc,
-                    projects: [],
+                    labs: [],
                 },
             })
         );
