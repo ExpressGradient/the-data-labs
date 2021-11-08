@@ -7,7 +7,7 @@ import {
     LabsUnderOrg,
 } from "../../components/dashboard/index";
 import useSWR from "swr";
-import { Box } from "@chakra-ui/react";
+import { Box, Divider, Stack } from "@chakra-ui/react";
 import supabase from "../../supabase_client";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
@@ -40,7 +40,11 @@ const Dashboard = ({ state, payload }) => {
                 picture={payload.picture}
             />
             <Box as="main" mx={["4", "auto"]} w={["100%", 2 / 3]}>
-                <LabSearchBar />
+                <Stack>
+                    <LabSearchBar />
+                    <Divider />
+                    <LabsUnderOrg ssrLabs={payload.labs} />
+                </Stack>
             </Box>
         </>
     );
@@ -69,10 +73,15 @@ export const getServerSideProps = withPageAuthRequired({
             };
         }
 
+        const { data: labs } = await supabase
+            .from("labs")
+            .select("*")
+            .eq("org", orgs[0].id);
+
         return {
             props: {
                 state: "USER_HAS_ORG",
-                payload: { ...orgs[0], picture: user.picture },
+                payload: { ...orgs[0], picture: user.picture, labs },
             },
         };
     },

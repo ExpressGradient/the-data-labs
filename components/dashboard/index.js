@@ -16,6 +16,10 @@ import {
     Flex,
     InputGroup,
     InputLeftElement,
+    Grid,
+    GridItem,
+    Text,
+    Badge,
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -69,7 +73,7 @@ export const DashboardCreateOrgForm = () => {
             }),
         });
 
-        const { message, error } = await res.json();
+        const { error } = await res.json();
 
         if (!error) {
             toast({
@@ -179,7 +183,6 @@ export const DashboardCreateOrgForm = () => {
 
 export const LabSearchBar = () => {
     const { register } = useForm();
-    const router = useRouter();
 
     return (
         <Flex as="form">
@@ -201,21 +204,66 @@ export const LabSearchBar = () => {
             <Button type="submit" colorScheme="teal" mx="2" variant="outline">
                 Search
             </Button>
-            <Button
-                leftIcon={<AddIcon />}
-                colorScheme="teal"
-                onClick={() => router.push("/dashboard/labs/new")}
-            >
-                Create
-            </Button>
         </Flex>
     );
 };
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
-export const LabsUnderOrg = () => {
-    const { data } = useSWR("/api/lab/getAll", fetcher);
+export const LabsUnderOrg = ({ ssrLabs }) => {
+    const { data: labs } = useSWR("/api/lab/getAll", fetcher, {
+        fallbackData: ssrLabs,
+    });
+    const router = useRouter();
 
-    return <Heading>{JSON.stringify(data)}</Heading>;
+    return (
+        <Box>
+            <Heading size="lg" mb="4" id="your-labs">
+                Your Labs
+            </Heading>
+            <Grid templateColumns="repeat(4, 1fr)" gap={4}>
+                <GridItem
+                    boxShadow="md"
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    cursor="pointer"
+                    colSpan={[4, 1]}
+                    py={[10, 0]}
+                    onClick={() => router.push("/dashboard/labs/new")}
+                >
+                    <Box>
+                        <Flex justifyContent="center">
+                            <AddIcon />
+                        </Flex>
+                        <Text fontSize="sm">Create a new Lab</Text>
+                    </Box>
+                </GridItem>
+                <>
+                    {labs.map((lab) => (
+                        <GridItem
+                            key={lab.id}
+                            boxShadow="md"
+                            p={3}
+                            cursor="pointer"
+                            colSpan={[4, 1]}
+                        >
+                            <Text fontSize="lg" fontWeight="semibold">
+                                {lab.name}
+                            </Text>
+                            <Text fontSize="sm" color="gray" mt={3}>
+                                {lab.description}
+                            </Text>
+                            <Badge
+                                colorScheme={lab.isPrivate ? "green" : "red"}
+                                mt={2}
+                            >
+                                {lab.isPrivate ? "Private" : "Public"}
+                            </Badge>
+                        </GridItem>
+                    ))}
+                </>
+            </Grid>
+        </Box>
+    );
 };

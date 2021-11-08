@@ -11,12 +11,9 @@ const getAll = async (req, res) => {
 
     const orgId = orgs[0].id;
 
-    const { data: labs } = await supabase
-        .from("labs")
-        .select("name, description")
-        .eq("org", orgId);
+    const { data } = await supabase.from("labs").select("*").eq("org", orgId);
 
-    res.json({ ...labs });
+    res.json(data);
 };
 
 export default withApiAuthRequired(getAll);

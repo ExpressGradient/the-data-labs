@@ -10,7 +10,7 @@ import {
     Text,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { ChevronRightIcon, SettingsIcon, WarningIcon } from "@chakra-ui/icons";
+import { SettingsIcon, WarningIcon } from "@chakra-ui/icons";
 import Link from "next/link";
 
 const Nav = ({ title, description, picture }) => {
@@ -42,7 +42,7 @@ const Nav = ({ title, description, picture }) => {
 
                     <MenuList>
                         <MenuItem icon={<SettingsIcon />} id="settings-link">
-                            <Link href="settings">
+                            <Link href="/settings">
                                 <a>Settings</a>
                             </Link>
                         </MenuItem>
@@ -64,12 +64,12 @@ const Nav = ({ title, description, picture }) => {
             <Flex as="nav" mt="2">
                 {navLinks.map((link, index) => (
                     <Flex mr="2" key={index} align="center" id={link.path}>
-                        <ChevronRightIcon />
-                        <Box mx="1" />
+                        /
                         <Box
                             color="teal"
                             _hover={{ textDecoration: "underline" }}
                             fontSize="sm"
+                            ml="1"
                         >
                             <Link href={link.path}>
                                 <a>{link.name}</a>
