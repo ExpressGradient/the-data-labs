@@ -1,12 +1,10 @@
 import { withApiAuthRequired } from "@auth0/nextjs-auth0";
-import client, { q } from "../../../fauna_client";
+import supabase from "../../../supabase_client";
 
 const checkUniqueLabName = async (req, res) => {
     const { slug } = req.query;
 
-    const { data } = await client.query(
-        q.Paginate(q.Match(q.Index("lab_by_slug"), slug))
-    );
+    const { data } = await supabase.from("labs").select("*").eq("slug", slug);
 
     res.json({ isUnique: data.length === 0 });
 };

@@ -22,6 +22,7 @@ import { useForm } from "react-hook-form";
 import { AddIcon, SearchIcon } from "@chakra-ui/icons";
 import slugify from "slugify";
 import { useRouter } from "next/router";
+import useSWR from "swr";
 
 export const DashboardAlert = () => (
     <Box mx={[4, "auto"]} mt="32" w={["100%", "50%"]}>
@@ -209,4 +210,12 @@ export const LabSearchBar = () => {
             </Button>
         </Flex>
     );
+};
+
+const fetcher = (url) => fetch(url).then((r) => r.json());
+
+export const LabsUnderOrg = () => {
+    const { data } = useSWR("/api/lab/getAll", fetcher);
+
+    return <Heading>{JSON.stringify(data)}</Heading>;
 };

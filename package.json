@@ -11,7 +11,7 @@
     "dependencies": {
         "@auth0/nextjs-auth0": "^1.5.0",
         "@chakra-ui/icons": "^1.0.15",
-        "faunadb": "^4.4.1",
+        "@supabase/supabase-js": "^1.25.2",
         "next": "^12.0.2",
         "react": "17.0.2",
         "react-dom": "17.0.2",

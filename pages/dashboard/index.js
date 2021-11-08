@@ -1,14 +1,14 @@
 import { getSession, withPageAuthRequired } from "@auth0/nextjs-auth0";
 import Nav from "../../components/global/Nav";
-import getOrgByUserId from "../../utils/get_org_by_user_id";
 import {
     DashboardAlert,
     DashboardCreateOrgForm,
     LabSearchBar,
+    LabsUnderOrg,
 } from "../../components/dashboard/index";
-import client, { q } from "../../fauna_client";
 import useSWR from "swr";
 import { Box } from "@chakra-ui/react";
+import supabase from "../../supabase_client";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -34,7 +34,11 @@ const Dashboard = ({ state, payload }) => {
 
     return (
         <>
-            <Nav title={data.name} picture={payload.picture} />
+            <Nav
+                title={data.name}
+                description={data.description}
+                picture={payload.picture}
+            />
             <Box as="main" mx={["4", "auto"]} w={["100%", 2 / 3]}>
                 <LabSearchBar />
             </Box>
@@ -51,7 +55,10 @@ export const getServerSideProps = withPageAuthRequired({
             return { props: { state: "EMAIL_NOT_VERIFIED" } };
         }
 
-        const { data: orgs } = await getOrgByUserId(user.sub);
+        const { data: orgs } = await supabase
+            .from("orgs")
+            .select()
+            .eq("owner_id", user.sub);
 
         if (orgs.length === 0) {
             return {
@@ -62,13 +69,10 @@ export const getServerSideProps = withPageAuthRequired({
             };
         }
 
-        const [orgRef] = orgs;
-        const { data: org } = await client.query(q.Get(orgRef));
-
         return {
             props: {
                 state: "USER_HAS_ORG",
-                payload: { ...org, picture: user.picture },
+                payload: { ...orgs[0], picture: user.picture },
             },
         };
     },

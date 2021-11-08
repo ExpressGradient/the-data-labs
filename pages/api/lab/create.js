@@ -1,32 +1,27 @@
 import { getSession, withApiAuthRequired } from "@auth0/nextjs-auth0";
-import client, { q } from "../../../fauna_client";
-import getOrgByUserId from "../../../utils/get_org_by_user_id";
+import supabase from "../../../supabase_client";
 
 const createLab = async (req, res) => {
     try {
-        const { user } = getSession(req, res);
+        const { user } = getSession(req);
 
-        const { data: orgs } = await getOrgByUserId(user.sub);
-        const [orgRef] = orgs;
+        const { data: orgs } = await supabase
+            .from("orgs")
+            .select("*")
+            .eq("owner_id", user.sub);
 
-        const { slug } = req.body;
+        const org = orgs[0];
 
-        await client.query(
-            q.Do(
-                q.CreateDatabase({ name: slug }),
-                q.Create(q.Collection("Labs"), { data: { ...req.body } }),
-                q.Update(orgRef, {
-                    data: {
-                        labs: q.Append(
-                            [slug],
-                            q.Select(["data", "labs"], q.Get(orgRef))
-                        ),
-                    },
-                })
-            )
-        );
+        const { error } = await supabase
+            .from("labs")
+            .insert([{ ...req.body, org: org.id }]);
 
-        res.json({ data: `${req.body.name} Lab created successfully` });
+        if (error) {
+            console.error("Error while creating a Lab", error);
+            res.json({ error });
+        } else {
+            res.json({ data: `${req.body.name} Lab created successfully` });
+        }
     } catch (error) {
         console.error("Error while creating a Lab", error);
         res.json({ error });

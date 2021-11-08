@@ -56,7 +56,7 @@ export const CreateLabForm = () => {
                 status: "success",
                 message: "Lab created successfully",
             });
-            setTimeout(() => router.push(`/labs/${slug}`), 1500);
+            setTimeout(() => router.push(`/dashboard/labs/${slug}`), 1500);
         }
     };
 
@@ -108,11 +108,13 @@ export const CreateLabForm = () => {
                 <Textarea
                     id="lab-desc-text-area"
                     variant="filled"
-                    {...register("desc")}
+                    {...register("description")}
                     maxLength={100}
                 />
                 <FormHelperText>
-                    Max Length: {watch("desc") ? watch("desc").length : 0} / 100
+                    Max Length:{" "}
+                    {watch("description") ? watch("description").length : 0} /
+                    100
                 </FormHelperText>
             </FormControl>
             <FormControl isRequired>

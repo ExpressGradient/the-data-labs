@@ -7,12 +7,13 @@ import {
     MenuButton,
     MenuList,
     MenuItem,
+    Text,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { ChevronRightIcon, SettingsIcon, WarningIcon } from "@chakra-ui/icons";
 import Link from "next/link";
 
-const Nav = ({ title, picture }) => {
+const Nav = ({ title, description, picture }) => {
     const router = useRouter();
     let currentPath = "";
     const paths = router.pathname.split("/");
@@ -55,6 +56,10 @@ const Nav = ({ title, picture }) => {
                     </MenuList>
                 </Menu>
             </Flex>
+
+            <Text fontSize="sm" color="gray">
+                {description}
+            </Text>
 
             <Flex as="nav" mt="2">
                 {navLinks.map((link, index) => (
