@@ -1,6 +1,6 @@
 const Labs = () => <></>;
 
-export const getStaticProps = async () => {
+export const getServerSideProps = async () => {
     return {
         redirect: {
             destination: "/dashboard#your-labs",
