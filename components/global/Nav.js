@@ -16,7 +16,7 @@ import Link from "next/link";
 const Nav = ({ title, description, picture }) => {
     const router = useRouter();
     let currentPath = "";
-    const paths = router.pathname.split("/");
+    const paths = router.asPath.split("/");
     const navLinks = [];
     paths.forEach((path) => {
         if (path !== "") {

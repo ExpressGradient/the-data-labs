@@ -83,6 +83,7 @@ export const CreateLabForm = () => {
                     type="text"
                     id="lab-name-input"
                     variant="filled"
+                    maxLength={50}
                     {...register("name", {
                         validate: {
                             slugIsNotUnique: async () => {

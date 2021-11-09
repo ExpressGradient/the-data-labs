@@ -16,7 +16,7 @@ import {
     Flex,
     InputGroup,
     InputLeftElement,
-    Grid,
+    SimpleGrid,
     GridItem,
     Text,
     Badge,
@@ -214,30 +214,30 @@ export const LabsUnderOrg = ({ ssrLabs }) => {
     const { data: labs } = useSWR("/api/lab/getAll", fetcher, {
         fallbackData: ssrLabs,
     });
-    const router = useRouter();
 
     return (
         <Box>
             <Heading size="lg" mb="4" id="your-labs">
                 Your Labs
             </Heading>
-            <Grid templateColumns="repeat(4, 1fr)" gap={4}>
+            <SimpleGrid columns={[1, 4]} gap={4}>
                 <GridItem
                     boxShadow="md"
                     display="flex"
                     justifyContent="center"
                     alignItems="center"
                     cursor="pointer"
-                    colSpan={[4, 1]}
-                    py={[10, 0]}
-                    onClick={() => router.push("/dashboard/labs/new")}
                 >
-                    <Box>
-                        <Flex justifyContent="center">
-                            <AddIcon />
-                        </Flex>
-                        <Text fontSize="sm">Create a new Lab</Text>
-                    </Box>
+                    <Link href="/dashboard/labs/new">
+                        <a>
+                            <Box>
+                                <Flex justifyContent="center">
+                                    <AddIcon />
+                                </Flex>
+                                <Text fontSize="sm">Create a new Lab</Text>
+                            </Box>
+                        </a>
+                    </Link>
                 </GridItem>
                 <>
                     {labs.map((lab) => (
@@ -246,24 +246,36 @@ export const LabsUnderOrg = ({ ssrLabs }) => {
                             boxShadow="md"
                             p={3}
                             cursor="pointer"
-                            colSpan={[4, 1]}
                         >
-                            <Text fontSize="lg" fontWeight="semibold">
-                                {lab.name}
-                            </Text>
-                            <Text fontSize="sm" color="gray" mt={3}>
-                                {lab.description}
-                            </Text>
-                            <Badge
-                                colorScheme={lab.isPrivate ? "green" : "red"}
-                                mt={2}
-                            >
-                                {lab.isPrivate ? "Private" : "Public"}
-                            </Badge>
+                            <Link href={`/dashboard/labs/${lab.slug}`}>
+                                <a>
+                                    <Box>
+                                        <Text
+                                            fontSize="lg"
+                                            fontWeight="semibold"
+                                        >
+                                            {lab.name}
+                                        </Text>
+                                        <Text fontSize="sm" color="gray" mt={3}>
+                                            {lab.description}
+                                        </Text>
+                                        <Badge
+                                            colorScheme={
+                                                lab.isPrivate ? "green" : "red"
+                                            }
+                                            mt={2}
+                                        >
+                                            {lab.isPrivate
+                                                ? "Private"
+                                                : "Public"}
+                                        </Badge>
+                                    </Box>
+                                </a>
+                            </Link>
                         </GridItem>
                     ))}
                 </>
-            </Grid>
+            </SimpleGrid>
         </Box>
     );
 };

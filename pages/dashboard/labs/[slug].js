@@ -1,7 +1,23 @@
 import { getSession, withPageAuthRequired } from "@auth0/nextjs-auth0";
 import supabase from "../../../supabase_client";
+import Nav from "../../../components/global/Nav";
+import Head from "next/head";
 
-const LabView = () => <></>;
+const LabView = ({ payload }) => {
+    return (
+        <>
+            <Head>
+                <title>The Data Labs - {payload.lab.name}</title>
+                <meta name="description" content={payload.lab.description} />
+            </Head>
+            <Nav
+                title={payload.lab.name}
+                description={payload.lab.description}
+                picture={payload.picture}
+            />
+        </>
+    );
+};
 
 export const getServerSideProps = withPageAuthRequired({
     async getServerSideProps({ req, params }) {
@@ -30,7 +46,7 @@ export const getServerSideProps = withPageAuthRequired({
 
         return {
             props: {
-                payload: labs[0],
+                payload: { picture: user.picture, lab: labs[0] },
             },
         };
     },
