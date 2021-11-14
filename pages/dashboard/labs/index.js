@@ -3,7 +3,7 @@ const Labs = () => <></>;
 export const getServerSideProps = async () => {
     return {
         redirect: {
-            destination: "/dashboard#your-labs",
+            destination: "/dashboard",
             permanent: true,
         },
     };

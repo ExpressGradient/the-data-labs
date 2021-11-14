@@ -31,7 +31,7 @@ const Nav = ({ title, description, picture }) => {
     return (
         <Box as="header" my="4" w={["100%", 2 / 3]} mx={["4", "auto"]}>
             <Flex justify="space-between">
-                <Heading>{title}</Heading>
+                <Heading size="lg">{title}</Heading>
 
                 <Menu colorScheme="teal">
                     <Avatar

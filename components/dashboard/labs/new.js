@@ -65,8 +65,6 @@ export const CreateLabForm = () => {
             as="form"
             w={["100%", 1 / 3]}
             mx={[4, "auto"]}
-            boxShadow="base"
-            p="4"
             spacing={4}
             align="stretch"
             onSubmit={handleSubmit(async (data) => await createLab(data))}

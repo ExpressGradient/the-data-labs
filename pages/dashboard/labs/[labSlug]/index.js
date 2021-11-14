@@ -1,7 +1,9 @@
 import { getSession, withPageAuthRequired } from "@auth0/nextjs-auth0";
-import supabase from "../../../supabase_client";
-import Nav from "../../../components/global/Nav";
+import supabase from "../../../../supabase_client";
+import Nav from "../../../../components/global/Nav";
 import Head from "next/head";
+import { Stack, Divider, Heading } from "@chakra-ui/react";
+import { ModelGrid } from "../../../../components/dashboard/labs/[labSlug]";
 
 const LabView = ({ payload }) => {
     return (
@@ -15,6 +17,16 @@ const LabView = ({ payload }) => {
                 description={payload.lab.description}
                 picture={payload.picture}
             />
+            <Stack
+                as="main"
+                w={["full", 2 / 3]}
+                mx={[4, "auto"]}
+                direction="column"
+            >
+                <Divider />
+                <Heading size="lg">Your Models</Heading>
+                <ModelGrid />
+            </Stack>
         </>
     );
 };
@@ -33,7 +45,7 @@ export const getServerSideProps = withPageAuthRequired({
             .from("labs")
             .select("*")
             .eq("org", orgId)
-            .eq("slug", params.slug);
+            .eq("slug", params.labSlug);
 
         if (labs.length === 0) {
             return {
