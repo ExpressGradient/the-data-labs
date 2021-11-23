@@ -5,13 +5,11 @@ import { nanoid } from "nanoid";
 const addData = async (req, res) => {
     const { modelSlug, apiKey } = req.query;
 
-    const { model } = await supabase
+    const { data: model } = await supabase
         .from("models")
         .select("*")
         .eq("slug", modelSlug)
         .single();
-
-    console.log(req.headers);
 
     if (apiKey === model.key) {
         const ajv = new Ajv();
