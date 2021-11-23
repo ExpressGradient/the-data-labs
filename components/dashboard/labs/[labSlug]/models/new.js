@@ -78,6 +78,8 @@ export const CreateModelForm = () => {
                 type: "error",
                 message: `Error occurred in creating ${data.modelName}`,
             });
+
+            setTimeout(() => setAlert(null), 2000);
         }
     };
 

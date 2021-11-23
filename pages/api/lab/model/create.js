@@ -18,8 +18,8 @@ const createModel = async (req, res) => {
             .eq("slug", labSlug)
             .single();
 
-        const properties = {};
-        const required = [];
+        const properties = { id: { type: "string" } };
+        const required = ["id"];
 
         modelFields.forEach(({ name, type }) => {
             properties[name] = { type };
