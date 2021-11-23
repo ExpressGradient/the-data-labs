@@ -1,7 +1,12 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import {
+    Alert,
+    AlertIcon,
+    AlertTitle,
     Button,
     FormControl,
+    FormErrorMessage,
+    FormHelperText,
     FormLabel,
     Input,
     Select,
@@ -10,32 +15,128 @@ import {
     Textarea,
 } from "@chakra-ui/react";
 import { SmallCloseIcon } from "@chakra-ui/icons";
+import slugify from "slugify";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
 export const CreateModelForm = () => {
-    const { register, control, handleSubmit } = useForm();
+    const {
+        register,
+        control,
+        handleSubmit,
+        watch,
+        formState: { errors, isSubmitting },
+    } = useForm();
+
     const { fields, append, remove } = useFieldArray({
         control,
         name: "modelField",
     });
 
-    const onAddFieldClick = () => append({ name: "", type: "int8" });
+    const router = useRouter();
+
+    const [alert, setAlert] = useState("");
+
+    const onAddFieldClick = () => append({ name: "", type: "string" });
 
     const onRemoveFieldClick = (index) => remove(index);
 
-    // TODO submit form
-    const onFormSubmit = () => handleSubmit((data) => console.log(data));
+    const submitHandler = async (data) => {
+        const { labSlug } = router.query;
+
+        const modelSlug = slugify(`${watch("modelName")}`, { lower: true });
+
+        const res = await fetch("/api/lab/model/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                ...data,
+                labSlug,
+                modelSlug,
+            }),
+        });
+
+        const { message, error } = await res.json();
+
+        if (message) {
+            setAlert({
+                type: "success",
+                message,
+            });
+
+            setTimeout(
+                () =>
+                    router.push(
+                        `/dashboard/labs/${labSlug}/models/${modelSlug}`
+                    ),
+                1500
+            );
+        } else if (error) {
+            setAlert({
+                type: "error",
+                message: `Error occurred in creating ${data.modelName}`,
+            });
+        }
+    };
 
     return (
-        <Stack as="form" direction="column" onSubmit={onFormSubmit}>
+        <Stack
+            as="form"
+            direction="column"
+            onSubmit={handleSubmit(submitHandler)}
+        >
+            {alert && (
+                <Alert status={alert.type}>
+                    <AlertIcon />
+                    <AlertTitle>{alert.message}</AlertTitle>
+                </Alert>
+            )}
             <FormControl isRequired>
                 <FormLabel htmlFor="model-name">Model Name:</FormLabel>
                 <Input
                     type="text"
                     id="model-name"
-                    {...register("modelName")}
+                    {...register("modelName", {
+                        validate: {
+                            isUnique: async () => {
+                                const { labSlug } = router.query;
+
+                                const res = await fetch(
+                                    "/api/lab/model/check_unique_name",
+                                    {
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        method: "POST",
+                                        body: JSON.stringify({
+                                            modelSlug: slugify(
+                                                watch("modelName"),
+                                                { lower: true }
+                                            ),
+                                            labSlug,
+                                        }),
+                                    }
+                                );
+
+                                const { isUnique } = await res.json();
+
+                                return isUnique || "Model already exists";
+                            },
+                        },
+                    })}
                     variant="filled"
                     maxLength={50}
                 />
+                <FormHelperText>
+                    Slug:{" "}
+                    {watch("modelName") &&
+                        slugify(`${watch("modelName")}`, { lower: true })}
+                </FormHelperText>
+                <FormErrorMessage>
+                    {errors && errors.modelName && errors.modelName.message}
+                </FormErrorMessage>
             </FormControl>
             <FormControl isRequired>
                 <FormLabel htmlFor="model-desc">Model Description:</FormLabel>
@@ -45,16 +146,13 @@ export const CreateModelForm = () => {
                     {...register("modelDescription")}
                     maxLength={100}
                 />
-            </FormControl>
-            <FormControl isRequired>
-                <FormLabel htmlFor="branch-name">Branch Name:</FormLabel>
-                <Input
-                    type="text"
-                    id="branch-name"
-                    {...register("branchName")}
-                    variant="filled"
-                    maxLength={50}
-                />
+                <FormHelperText>
+                    Max:{" "}
+                    {watch("modelDescription")
+                        ? watch("modelDescription").length
+                        : 0}{" "}
+                    / 100
+                </FormHelperText>
             </FormControl>
             <Text color="black" fontWeight="semibold">
                 Fields:
@@ -62,16 +160,23 @@ export const CreateModelForm = () => {
             <Stack>
                 <Stack direction="row">
                     <FormControl>
+                        <FormLabel htmlFor="idInput" hidden>
+                            Id
+                        </FormLabel>
                         <Input
                             type="text"
                             variant="filled"
                             value="id"
                             isReadOnly
+                            id="idInput"
                         />
                     </FormControl>
                     <FormControl>
-                        <Select variant="filled" isReadOnly>
-                            <option value="int8">int8</option>
+                        <FormLabel htmlFor="typeInput" hidden>
+                            Id Type
+                        </FormLabel>
+                        <Select variant="filled" isReadOnly id="typeInput">
+                            <option value="integer">Integer</option>
                         </Select>
                     </FormControl>
                     <Button isDisabled>
@@ -81,29 +186,32 @@ export const CreateModelForm = () => {
                 <>
                     {fields.map((field, index) => (
                         <Stack direction="row" key={field.id}>
-                            <FormControl>
+                            <FormControl isRequired>
+                                <FormLabel htmlFor={`name-${index}`} hidden>
+                                    Field Name
+                                </FormLabel>
                                 <Input
                                     type="text"
-                                    {...register(`modelField.${index}.name`)}
+                                    {...register(`modelFields.${index}.name`)}
                                     variant="filled"
                                     placeholder="name"
                                     maxLength={30}
+                                    id={`name-${index}`}
                                 />
                             </FormControl>
-                            <FormControl>
+                            <FormControl isRequired>
+                                <FormLabel htmlFor={`type-${index}`} hidden>
+                                    Field Type
+                                </FormLabel>
                                 <Select
                                     variant="filled"
-                                    {...register(`modelField.${index}.type`)}
+                                    {...register(`modelFields.${index}.type`)}
+                                    id={`type-${index}`}
                                 >
-                                    <option value="int2">int2</option>
-                                    <option value="int4">int4</option>
-                                    <option value="int8">int8</option>
-                                    <option value="float4">float4</option>
-                                    <option value="float8">float8</option>
-                                    <option value="text">text</option>
-                                    <option value="bool">bool</option>
-                                    <option value="time">time</option>
-                                    <option value="timestamp">timestamp</option>
+                                    <option value="string">String</option>
+                                    <option value="number">Number</option>
+                                    <option value="integer">Integer</option>
+                                    <option value="boolean">Boolean</option>
                                 </Select>
                             </FormControl>
                             <Button onClick={() => onRemoveFieldClick(index)}>
@@ -120,7 +228,7 @@ export const CreateModelForm = () => {
                     Add a Field
                 </Button>
             </Stack>
-            <Button colorScheme="teal" type="submit">
+            <Button colorScheme="teal" type="submit" isLoading={isSubmitting}>
                 Submit
             </Button>
         </Stack>
