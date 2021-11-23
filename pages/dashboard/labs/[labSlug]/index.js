@@ -25,7 +25,7 @@ const LabView = ({ payload }) => {
             >
                 <Divider />
                 <Heading size="lg">Your Models</Heading>
-                <ModelGrid />
+                <ModelGrid models={payload.models} />
             </Stack>
         </>
     );
@@ -56,9 +56,14 @@ export const getServerSideProps = withPageAuthRequired({
             };
         }
 
+        const { data: models } = await supabase
+            .from("models")
+            .select("*")
+            .eq("lab", labs[0].id);
+
         return {
             props: {
-                payload: { picture: user.picture, lab: labs[0] },
+                payload: { picture: user.picture, lab: labs[0], models },
             },
         };
     },

@@ -1,17 +1,13 @@
 import { GridItem, SimpleGrid, Text } from "@chakra-ui/react";
-import useSWR from "swr";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-export const ModelGrid = () => {
+export const ModelGrid = ({ models }) => {
     const router = useRouter();
     const { labSlug } = router.query;
 
-    const { data } = useSWR(`/api/lab/model/getAll?labSlug=${labSlug}`);
-    console.log(data);
-
     return (
-        <SimpleGrid columns={[1, 4]}>
+        <SimpleGrid columns={[1, 4]} gap={3}>
             <GridItem py={10} boxShadow="md" cursor="pointer">
                 <Link href={`./${labSlug}/models/new`}>
                     <a>
@@ -19,6 +15,22 @@ export const ModelGrid = () => {
                     </a>
                 </Link>
             </GridItem>
+            <>
+                {models.map((model, index) => (
+                    <GridItem
+                        key={index}
+                        py={10}
+                        boxShadow="md"
+                        cursor="pointer"
+                    >
+                        <Link href={`./${labSlug}/models/${model.slug}`}>
+                            <a>
+                                <Text align="center">{model.name}</Text>
+                            </a>
+                        </Link>
+                    </GridItem>
+                ))}
+            </>
         </SimpleGrid>
     );
 };
