@@ -3,7 +3,7 @@ import Ajv from "ajv";
 import { nanoid } from "nanoid";
 
 const addData = async (req, res) => {
-    const { modelSlug } = req.query;
+    const { modelSlug, apiKey } = req.query;
 
     const { model } = await supabase
         .from("models")
@@ -11,9 +11,9 @@ const addData = async (req, res) => {
         .eq("slug", modelSlug)
         .single();
 
-    const inputKey = req.headers["Authorization"].split(" ")[1];
+    console.log(req.headers);
 
-    if (inputKey === model.key) {
+    if (apiKey === model.key) {
         const ajv = new Ajv();
         const schema = JSON.parse(model.schema);
         const validate = ajv.compile(schema);
