@@ -7,6 +7,6 @@ Data Science made Cheaper
 
 ## Tech
 1. Next.js
-2. Fauna
+2. Supabase
 3. Auth0
 4. Chakra UI
