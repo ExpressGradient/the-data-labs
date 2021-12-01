@@ -253,7 +253,7 @@ const ModelSlug = ({ payload }) => {
                         <Tab>
                             <HStack>
                                 <Text>Machine Learning</Text>
-                                <Badge colorScheme="blue">Alpha</Badge>
+                                <Badge colorScheme="orange">Beta</Badge>
                             </HStack>
                         </Tab>
                     </TabList>

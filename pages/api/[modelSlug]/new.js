@@ -21,7 +21,7 @@ const addData = async (req, res) => {
         if (validate(data)) {
             await supabase
                 .from("model_data")
-                .insert([{ model: model.id, data: JSON.stringify(data) }]);
+                .insert([{ model: model.id, data }]);
 
             res.status(200).json({
                 status: "success",
