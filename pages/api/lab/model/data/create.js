@@ -12,10 +12,8 @@ const create = async (req, res) => {
         .eq("slug", modelSlug)
         .single();
 
-    const schema = JSON.parse(model.schema);
-
     const ajv = new Ajv();
-    const validate = ajv.compile(schema);
+    const validate = ajv.compile(model.schema);
 
     const record = {
         id: nanoid(),

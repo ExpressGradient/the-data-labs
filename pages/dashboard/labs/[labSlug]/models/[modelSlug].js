@@ -33,12 +33,14 @@ import {
     Heading,
     Code,
     useBoolean,
+    Select,
 } from "@chakra-ui/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import useSWR, { useSWRConfig } from "swr";
 import { useRouter } from "next/router";
 import { ViewOffIcon, ViewIcon } from "@chakra-ui/icons";
+import Script from "next/script";
 
 const AddDataFormControl = ({ field, type, register }) => {
     switch (type) {
@@ -110,11 +112,9 @@ const Explorer = ({ model, SSRrows }) => {
             <Table variant="striped">
                 <Thead>
                     <Tr>
-                        {Object.keys(JSON.parse(model.schema).properties).map(
-                            (field) => (
-                                <Th key={field}>{field}</Th>
-                            )
-                        )}
+                        {Object.keys(model.schema.properties).map((field) => (
+                            <Th key={field}>{field}</Th>
+                        ))}
                     </Tr>
                 </Thead>
                 <Tbody>
@@ -167,20 +167,20 @@ const Explorer = ({ model, SSRrows }) => {
                             })}
                         >
                             <>
-                                {Object.entries(
-                                    JSON.parse(model.schema).properties
-                                ).map(([field, { type }]) => {
-                                    if (field !== "id") {
-                                        return (
-                                            <AddDataFormControl
-                                                key={field}
-                                                field={field}
-                                                type={type}
-                                                register={register}
-                                            />
-                                        );
+                                {Object.entries(model.schema.properties).map(
+                                    ([field, { type }]) => {
+                                        if (field !== "id") {
+                                            return (
+                                                <AddDataFormControl
+                                                    key={field}
+                                                    field={field}
+                                                    type={type}
+                                                    register={register}
+                                                />
+                                            );
+                                        }
                                     }
-                                })}
+                                )}
                             </>
                             <Button type="submit" colorScheme="teal">
                                 Submit
@@ -226,6 +226,216 @@ const Developer = ({ apiKey }) => {
     );
 };
 
+const MachineLearning = ({ properties, rows }) => {
+    const [globalMl5, setGlobalMl5] = useState();
+    const {
+        register,
+        handleSubmit,
+        formState: { isSubmitting },
+        watch,
+        setValue,
+        reset,
+    } = useForm();
+    const [globalNN, setGlobalNN] = useState();
+
+    const trainSubmitHandler = ({
+        mlTask,
+        predictColumn,
+        epochs,
+        batchSize,
+    }) => {
+        // Initialize ML5 NN
+        const nn = globalMl5.neuralNetwork({
+            task: mlTask,
+            debug: true,
+        });
+
+        // Feed Data
+        rows.forEach(({ data }) => {
+            const input = JSON.parse(JSON.stringify(data));
+            delete input.id;
+            delete input[predictColumn];
+
+            const output = {};
+            output[predictColumn] = data[predictColumn];
+
+            nn.addData(input, output);
+        });
+
+        // Normalize Data
+        nn.normalizeData();
+
+        // Train NN
+        nn.train({ epochs, batchSize }, () => setGlobalNN(nn));
+    };
+
+    const predictSubmitHandler = (data) => {
+        const task = watch("mlTask");
+
+        const predictCallback = (error, result) => {
+            if (error) {
+                console.log(error);
+            } else {
+                const predictedResult =
+                    task === "regression"
+                        ? result[0][watch("predictColumn")]
+                        : result[0].label;
+
+                setValue("predictColumnResult", predictedResult);
+            }
+        };
+
+        task === "regression"
+            ? globalNN.predict(data, predictCallback)
+            : globalNN.classify(data, predictCallback);
+    };
+
+    const resetNeuralNetwork = () => {
+        setGlobalNN();
+        reset();
+    };
+
+    return (
+        <>
+            <Script
+                id="ml5-js"
+                src="https://unpkg.com/ml5@latest/dist/ml5.min.js"
+                strategy="afterInteractive"
+                onLoad={() => setGlobalMl5(ml5)}
+            />
+
+            <Stack direction="column" w={["full", 1 / 3]} mx={[0, "auto"]}>
+                {globalNN ? (
+                    <>
+                        <Heading>Start Predicting</Heading>
+                        <Stack
+                            direction="column"
+                            as="form"
+                            spacing={4}
+                            onSubmit={handleSubmit(predictSubmitHandler)}
+                        >
+                            <>
+                                {Object.entries(properties).map(
+                                    ([field, { type }]) => {
+                                        if (
+                                            field !== "id" &&
+                                            field !== watch("predictColumn")
+                                        ) {
+                                            return (
+                                                <AddDataFormControl
+                                                    key={field}
+                                                    field={field}
+                                                    type={type}
+                                                    register={register}
+                                                />
+                                            );
+                                        }
+                                    }
+                                )}
+                            </>
+                            <FormControl isReadOnly>
+                                <FormLabel htmlFor="predictColumn">
+                                    {watch("mlTask") === "regression"
+                                        ? "Predicted"
+                                        : "Classified"}{" "}
+                                    {watch("predictColumn")}
+                                </FormLabel>
+                                <Input
+                                    type="text"
+                                    variant="filled"
+                                    {...register("predictColumnResult")}
+                                />
+                            </FormControl>
+                            <Button
+                                colorScheme="teal"
+                                type="submit"
+                                isLoading={isSubmitting}
+                                variant="solid"
+                            >
+                                {watch("mlTask") === "regression"
+                                    ? "Predict"
+                                    : "Classify"}
+                            </Button>
+                            <Button onClick={resetNeuralNetwork}>
+                                Reset Neural Network
+                            </Button>
+                        </Stack>
+                    </>
+                ) : (
+                    <Stack
+                        direction="column"
+                        spacing={4}
+                        as="form"
+                        onSubmit={handleSubmit(trainSubmitHandler)}
+                    >
+                        <FormControl isRequired>
+                            <FormLabel htmlFor="task">ML Task:</FormLabel>
+                            <Select
+                                id="task"
+                                variant="filled"
+                                {...register("mlTask")}
+                            >
+                                <option value="regression">Regression</option>
+                                <option value="classification">
+                                    Classification
+                                </option>
+                            </Select>
+                        </FormControl>
+                        <FormControl isRequired>
+                            <FormLabel htmlFor="predict-column">
+                                Predict Attribute:
+                            </FormLabel>
+                            <Select
+                                id="predict-column"
+                                variant="filled"
+                                {...register("predictColumn")}
+                            >
+                                {Object.keys(properties).map((field) => {
+                                    if (field !== "id") {
+                                        return (
+                                            <option key={field} value={field}>
+                                                {field}
+                                            </option>
+                                        );
+                                    }
+                                })}
+                            </Select>
+                        </FormControl>
+                        <FormControl isRequired>
+                            <FormLabel htmlFor="epochs">Epochs:</FormLabel>
+                            <Input
+                                variant="filled"
+                                type="number"
+                                id="epochs"
+                                {...register("epochs")}
+                            />
+                        </FormControl>
+                        <FormControl isRequired>
+                            <FormLabel htmlFor="batch-size">
+                                Batch Size:
+                            </FormLabel>
+                            <Input
+                                variant="filled"
+                                type="number"
+                                id="batch-size"
+                                {...register("batchSize")}
+                            />
+                        </FormControl>
+                        <Button
+                            variant="solid"
+                            colorScheme="teal"
+                            type="submit"
+                            isLoading={isSubmitting}
+                        >
+                            Train Neural Network
+                        </Button>
+                    </Stack>
+                )}
+            </Stack>
+        </>
+    );
+};
+
 const ModelSlug = ({ payload }) => {
     return (
         <>
@@ -268,6 +478,13 @@ const ModelSlug = ({ payload }) => {
                         <TabPanel>
                             <Developer apiKey={payload.model.key} />
                         </TabPanel>
+                        <TabPanel></TabPanel>
+                        <TabPanel>
+                            <MachineLearning
+                                properties={payload.model.schema.properties}
+                                rows={payload.rows}
+                            />
+                        </TabPanel>
                     </TabPanels>
                 </Tabs>
             </Stack>
@@ -276,7 +493,7 @@ const ModelSlug = ({ payload }) => {
 };
 
 export const getServerSideProps = withPageAuthRequired({
-    async getServerSideProps({ req, params, res, query }) {
+    async getServerSideProps({ req, params, res }) {
         const { user } = getSession(req, res);
 
         const { data: orgs } = await supabase

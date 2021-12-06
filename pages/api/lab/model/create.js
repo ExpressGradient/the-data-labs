@@ -39,7 +39,7 @@ const createModel = async (req, res) => {
                 description,
                 slug,
                 lab: lab.id,
-                schema: JSON.stringify(schema),
+                schema,
                 key: nanoid(),
             },
         ]);
