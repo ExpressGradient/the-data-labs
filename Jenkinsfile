@@ -5,7 +5,8 @@ pipeline {
       steps {
         echo "executing npm..."
         nodejs("Node") {
-          sh "npm install"
+          sh "sudo npm install"
+          sh "sudo npm run build"
         }
       }
     }
