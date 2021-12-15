@@ -6,7 +6,6 @@ pipeline {
         echo "executing npm..."
         nodejs("Node") {
           sh "npm install"
-          sh "npm run build"
         }
       }
     }
