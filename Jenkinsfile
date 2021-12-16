@@ -7,9 +7,8 @@ pipeline {
   stages {
     stage("running frontend and backend") {
       steps {
-        echo "executing npm..."
-        echo "getting url ${SUPABASE_URL}"
-        echo "getting key ${SUPABASE_KEY}"
+        echo "Installing dependencies..."
+        echo "Building the Project..."
         nodejs("Node") {
           sh "npm install"
           sh "npm run build"
