@@ -16,7 +16,6 @@ pipeline {
         echo "<----------Installing dependencies---------->"
         nodejs("Node") {
           sh "npm install"
-          echo "Hello"
           echo "<----------Building application---------->"
           sh "npm run build"
         }
