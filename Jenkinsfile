@@ -14,6 +14,7 @@ pipeline {
     stage("Building...") {
       steps {
         echo "<----------Installing dependencies---------->"
+        echo "hello"
         nodejs("Node") {
           sh "npm install"
           echo "<----------Running tests---------->"
